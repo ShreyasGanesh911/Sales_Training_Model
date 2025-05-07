@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Input from "../Components/Input";
 import MessageBubble from "../Components/MessageBubble";
 interface Message {
@@ -19,6 +19,13 @@ const Chat = () => {
         type: 'text'
       }
     ]);
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+  
+    useEffect(() => {
+      scrollToBottom();
+    }, [messages]);
   return (
     <>
        <div className="flex justify-center items-start min-h-screen bg-gray-50 p-4">
