@@ -1,42 +1,57 @@
+import { useState, useRef } from 'react'
 import { Mic, MicOff } from 'react-feather'
-type Props = {
-    isMicActive:boolean,
-    enableMicrophone:(e: React.MouseEvent | React.TouchEvent)=>void,
-    disableMicrophone:(e: React.MouseEvent | React.TouchEvent)=>void
-}
-function MicButton({isMicActive}:Props) {
+
+function MicButton() {
+  const [isMicActive, setIsMicActive] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+
+  const enableMicrophone = async (e: React.PointerEvent) => {
+    e.preventDefault()
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.start()
+      setIsMicActive(true)
+    } catch (error) {
+      console.error('Error accessing microphone:', error)
+    }
+  }
+
+  const disableMicrophone = (e: React.PointerEvent) => {
+    e.preventDefault()
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop()
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
+      setIsMicActive(false)
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+      console.log('Recording stopped, audio blob created:', audioBlob)
+    }
+  }
+
   return (
     <>
-      <div  
-                // onContextMenu={(e) => e.preventDefault()}
-                // onPointerDown={enableMicrophone}
-                // onPointerUp={disableMicrophone}
-                // onPointerLeave={disableMicrophone}
-                className={`
-                  absolute sm:right-24 right-20 mr-2 bottom-6.5 p-3
-                  rounded-full transition-all duration-300 ease-in-out
-                  shadow-md hover:shadow-lg transform hover:scale-105
-                  flex items-center justify-center
-                  ${isMicActive 
-                    ? 'bg-blue-500 text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50' 
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                  }
-                  ${isMicActive ? 'scale-110' : 'scale-100'}
-                `}
-                style={{
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)'
-                }}
-              >
-                {isMicActive ? (
-                  <div className="relative">
-                    <Mic size={16} className="animate-bounce" />
-                    <div className="absolute -inset-1 bg-blue-500 rounded-full opacity-30 animate-ping" />
-                  </div>
-                ) : (
-                  <MicOff size={16} />
-                )}
-              </div>
+      <button
+        onPointerDown={enableMicrophone}
+        onPointerUp={disableMicrophone}
+        onPointerLeave={disableMicrophone}
+        className="sm:p-1 p-1 text-red-500 rounded-full hover:text-red-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
+      >
+        {isMicActive ? 
+          <Mic size={19} className="bg-blue-500 rounded-full text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50" /> 
+          :
+          <MicOff size={19} />
+        }
+      </button>
     </>
   )
 }
