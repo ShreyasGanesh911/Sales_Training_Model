@@ -2,7 +2,7 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 
-const tempDir = path.join(__dirname, 'public', 'temp');
+const tempDir = path.join(process.cwd(), 'public', 'temp');
 
 // Ensure the directory exists
 if (!fs.existsSync(tempDir)) {
