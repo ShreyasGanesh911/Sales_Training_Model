@@ -44,7 +44,7 @@ export const handleVideo= AsyncHandler(async(req:Request,res:Response,next:NextF
     const videoUrl = await uploadToCloudinary(file.path);
     const videoUrlString = videoUrl?.url;
 
-    console.log(videoUrl)
+    // console.log(videoUrl)
     res.status(200).json({
         success:true,
         message:"Audio transcript",
