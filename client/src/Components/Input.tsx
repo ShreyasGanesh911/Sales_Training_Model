@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Video,Send,MicOff, CloudOff,VideoOff} from "react-feather";
+import MicButton from './MicButton';
+import VideoButton from './VideoButton';
 function Input({}) {
     const [message, setMessage] = useState("");
   return (
@@ -13,22 +15,13 @@ function Input({}) {
         className="flex-1 px-4 py-4 bg-transparent  rounded-full text-gray-700 placeholder-gray-400 outline-none"
         value={message} onChange={(e) => setMessage(e.target.value)}/>
        <div id='Buttons' className='bg-white '>
-             {/* Buttons  */}
     {/* Send Button */}
       <button 
         className="sm:p-1 p-1 rotate-45 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300">
          <Send height={19} />
       </button>
-    {/* Mic Button */}
-      <button 
-        className="sm:p-1 p-1  text-red-500 hover:text-red-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300">
-         <MicOff height={19} />
-      </button>
-      {/* Video */}
-      <button 
-        className="sm:p-1 p-1 text-red-500 hover:text-red-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300">
-        <VideoOff height={19} />
-      </button>
+     <MicButton />
+     <VideoButton/>
       {/* Disconnect */}
       {/* <button  className=" text-red-500 hover:cursor-pointer hover:text-red-600 pr-2"> <CloudOff height={19} /> </button> */}
 
