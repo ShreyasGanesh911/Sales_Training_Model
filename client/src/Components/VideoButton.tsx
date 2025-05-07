@@ -1,20 +1,44 @@
-import { useState } from 'react'
-import { Video, VideoOff } from 'react-feather'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { Video} from 'react-feather'
 import VideoModal from './Modal/VideoModal'
+interface Message {
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+  type: 'text' | 'video' | 'audio'
+  url?: string
+}
 
-function VideoButton() {
+type Props = {
+  setMessages: Dispatch<SetStateAction<Message[]>>
+}
+
+function VideoButton({setMessages}:Props) {
   const [isActive, setIsActive] = useState(false)
   const [showModal, setShowModal] = useState(false)
-
+  const [videoURL, setVideoURL] = useState<string>("")
+  const [transcript, setTranscript] = useState<string>("")
   const handleVideoClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault()
     setShowModal(true)
     setIsActive(true)
   }
-
+  useEffect(()=>{
+    if(videoURL && transcript){
+      setMessages(prevMessages => [...prevMessages, {
+        text: transcript,
+        isUser: true,
+        timestamp: new Date(),
+        type: 'video',
+        url: videoURL
+      }])
+    }
+    console.log(videoURL)
+    console.log(transcript)
+  },[videoURL,transcript])
   return (
     <>
-      {showModal && <VideoModal setShow={setShowModal} setIsActive={setIsActive} />}
+      {showModal && <VideoModal setShow={setShowModal} setVideoURL={setVideoURL} setTranscript={setTranscript} setIsActive={setIsActive} />}
       <button
         onClick={handleVideoClick}
         className="sm:p-1 p-1 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"

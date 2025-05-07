@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 type Props = {
   setShow: React.Dispatch<React.SetStateAction<boolean>>
   setIsActive: React.Dispatch<React.SetStateAction<boolean>>
+  setVideoURL: React.Dispatch<React.SetStateAction<string>>
+  setTranscript: React.Dispatch<React.SetStateAction<string>>
 }
 
 type MediaError = {
@@ -11,7 +13,16 @@ type MediaError = {
   message: string
 }
 
-function VideoModal({ setShow, setIsActive }: Props) {
+type UploadVideoResponse = {
+  success: boolean
+  message: string
+  data: {
+    transcript: string
+    url: string
+  }
+}
+
+function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -21,6 +32,8 @@ function VideoModal({ setShow, setIsActive }: Props) {
   const [error, setError] = useState<MediaError | null>(null)
   const [timer, setTimer] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<{ success?: boolean; message: string } | null>(null)
 
   useEffect(() => {
     async function startVideo() {
@@ -139,17 +152,35 @@ function VideoModal({ setShow, setIsActive }: Props) {
 
   const uploadVideo = async () => {
     if (!recordedVideo) return
+    setIsUploading(true)
+    setUploadStatus(null)
     const formData = new FormData()
     formData.append('video', recordedVideo, 'recorded-video.webm')
 
     try {
-      const response = await fetch('/api/upload-video', {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/v1/gpt/video`, {
         method: 'POST',
         body: formData
       })
-      if (!response.ok) throw new Error('Upload failed')
+      
+      const data: UploadVideoResponse = await response.json()
+      
+      if (!response.ok) throw new Error(data.message || 'Upload failed')
+      setTranscript(data.data.transcript)
+      setVideoURL(data.data.url)
+      setUploadStatus({ success: true, message: 'Video uploaded successfully!' })
+      // Close the modal after 1 second on success
+      setTimeout(() => {
+        handleClose()
+      }, 1000)
+      
     } catch (error) {
-      console.error('Error:', error)
+      setUploadStatus({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to upload video'
+      })
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -174,6 +205,23 @@ function VideoModal({ setShow, setIsActive }: Props) {
         <button onClick={handleClose} className="absolute top-4 right-4 p-2 hover:text-red-500 transition-colors z-10">
           <X size={22}/>
         </button>
+
+        {isUploading && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg z-20">
+            <div className="text-white text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mx-auto mb-3"></div>
+              <p>Uploading video...</p>
+            </div>
+          </div>
+        )}
+
+        {uploadStatus && (
+          <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-6 py-3 rounded-lg ${
+            uploadStatus.success ? 'bg-green-500' : 'bg-red-500'
+          } text-white`}>
+            {uploadStatus.message}
+          </div>
+        )}
 
         {error ? <div className="w-full h-full flex items-center justify-center">
           <div className="text-center p-6 bg-red-50 rounded-lg">
@@ -211,7 +259,13 @@ function VideoModal({ setShow, setIsActive }: Props) {
                     <button onClick={startRecording} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors">
                       Record New
                     </button>
-                    <button onClick={uploadVideo} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors">
+                    <button 
+                      onClick={uploadVideo} 
+                      disabled={isUploading}
+                      className={`bg-green-500 text-white px-4 py-2 rounded-md transition-colors ${
+                        isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+                      }`}
+                    >
                       Upload Video
                     </button>
                   </div>
