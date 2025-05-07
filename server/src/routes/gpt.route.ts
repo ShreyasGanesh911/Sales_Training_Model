@@ -10,7 +10,7 @@ const gptRoute = express.Router();
     3. When user sends a video file --> send it to whisper api and get the transcript and then send it to chatgpt api and get the response
 */
 gptRoute.post("/text", handleText);
-gptRoute.post("/audio", upload.single("image"),handleAudio);
-gptRoute.post("/video", handleAudio);
+gptRoute.post("/audio", upload.single("audio"),handleAudio);
+gptRoute.post("/video",upload.single("video") ,handleVideo);
 
 export default gptRoute;
