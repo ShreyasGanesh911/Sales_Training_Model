@@ -6,6 +6,15 @@ interface Message {
     url?: string
 }
 
+// Typing animation component
+const TypingAnimation = () => (
+  <div className="flex space-x-1">
+    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+  </div>
+);
+
 type Props = {
     index: number
     message: Message
@@ -14,7 +23,11 @@ type Props = {
 function MessageBubble({index, message}: Props) {
   const renderText = () => (
     <div className="whitespace-pre-wrap break-words">
-      {message.text}
+      {message.text ? (
+        message.isUser ? message.text : <div dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, "<br>") }} />
+      ) : (
+        <TypingAnimation />
+      )}
     </div>
   )
 

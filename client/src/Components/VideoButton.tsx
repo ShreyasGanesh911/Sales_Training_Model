@@ -33,8 +33,6 @@ function VideoButton({setMessages}:Props) {
         url: videoURL
       }])
     }
-    console.log(videoURL)
-    console.log(transcript)
   },[videoURL,transcript])
   return (
     <>

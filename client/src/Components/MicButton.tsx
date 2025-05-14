@@ -63,11 +63,11 @@ function MicButton({setMessages}:Props) {
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' })
-        console.log('Audio details:', {
-          type: audioBlob.type,
-          size: audioBlob.size,
-          chunks: audioChunksRef.current.length
-        })
+        // console.log('Audio details:', {
+        //   type: audioBlob.type,
+        //   size: audioBlob.size,
+        //   chunks: audioChunksRef.current.length
+        // })
         
         try {
           const formData = new FormData()
@@ -79,7 +79,7 @@ function MicButton({setMessages}:Props) {
           })
 
           const data: AudioResponse = await response.json()
-          console.log('Audio upload response:', data)
+          // console.log('Audio upload response:', data)
 
           if (!response.ok) throw new Error(data.message || 'Upload failed')
 
