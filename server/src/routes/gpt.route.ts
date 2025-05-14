@@ -1,5 +1,5 @@
 import express from "express";
-import { handleAudio,handleVideo,handleText } from "../controllers/gpt.controller.js";
+import { handleAudio,handleVideo,handleText, handleAssessmentStart } from "../controllers/gpt.controller.js";
 import upload from "../middlewares/Multer.js";
 
 const gptRoute = express.Router();
@@ -12,5 +12,6 @@ const gptRoute = express.Router();
 gptRoute.post("/text", handleText);
 gptRoute.post("/audio", upload.single("audio"),handleAudio);
 gptRoute.post("/video",upload.single("video") ,handleVideo);
+gptRoute.post("/assessment",handleAssessmentStart);
 
 export default gptRoute;
