@@ -3,12 +3,19 @@ import AsyncHandler from "../utils/Asynchandler";
 import ErrorHandler from "../utils/ErrorHandler";
 import getWhisperTranscript from "../utils/WhisperTranscript";
 import uploadToCloudinary from "../utils/UploadToCloudinary";
-
+import gptText from "../utils/GPTText";
+import { sales_script } from "../script/script";
 export const handleText = AsyncHandler(async(req:Request,res:Response,next:NextFunction)=>{
+    const {text,messages} = req.body;
+    const response = await gptText(text,messages);
+    if(!response){
+        next(new ErrorHandler("Failed to generate a response from GPT",500))
+        return 
+    }
     res.status(200).json({
         success:true,
         message:"Audio transcript",
-        data:{}
+        data:response
     })
 })
 
@@ -52,5 +59,15 @@ export const handleVideo= AsyncHandler(async(req:Request,res:Response,next:NextF
             transcript,
             url:videoUrlString
         }
+    })
+})
+
+export const handleAssessmentStart = AsyncHandler(async(req:Request,res:Response,next:NextFunction)=>{
+    const text = sales_script;
+    const response = await gptText(text,[]);
+    res.status(200).json({
+        success:true,
+        message:"Assessment started",
+        data:response
     })
 })
