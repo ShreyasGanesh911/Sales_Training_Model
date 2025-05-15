@@ -3,7 +3,7 @@ import {Send} from "react-feather";
 import MicButton from './MicButton';
 import VideoButton from './VideoButton';
 import useLocalStorage from '../hooks/useLocalStorage';
-
+const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
 interface Message {
   text: string;
   isUser: boolean;
@@ -16,23 +16,14 @@ type Props = {
   setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
-// Typing animation component
-const TypingAnimation = () => (
-  <div className="flex items-center space-x-2 p-4">
-    <div className="flex space-x-1">
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-    </div>
-  </div>
-);
-
 function Input({setMessages}: Props) {
-  const { addMessage,messages } = useLocalStorage('chatMessages');
+  // const { addMessage,messages } = useLocalStorage('chatMessages');
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async() => {
+    const prevMsg = localStorage.getItem('chatMessages')
+    let prevMsgArray = JSON.parse(prevMsg || '[]')
     if (!message.trim()) return
     const userText = message;
     setMessage("")
@@ -53,14 +44,14 @@ function Input({setMessages}: Props) {
     }])
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/gpt/text",{
+      const response = await fetch(`${ENDPOINT}/api/v1/gpt/text`,{
         method:"POST",
         headers:{
           "Content-Type":"application/json"
         },
         body:JSON.stringify({
           text:userText,
-          messages:messages
+          messages:prevMsgArray
         })
       })
       const data = await response.json();
@@ -76,11 +67,19 @@ function Input({setMessages}: Props) {
         };
         return newMessages;
       });
-
-      addMessage({
-        content: userText,
-        role: 'user'
-      })
+      const msg1 = {
+        content:userText,
+        role:'user',
+      }
+      const msg2 = {
+        content:data.data,
+        role:'assistant',
+      }
+      
+            //console.log(prevMsg)
+            
+            prevMsgArray.push(msg1,msg2)
+            localStorage.setItem('chatMessages',JSON.stringify(prevMsgArray))
     } catch (error) {
       console.error('Error:', error);
       // Remove the typing indicator on error
