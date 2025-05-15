@@ -15,7 +15,7 @@ const getWhisperTranscript = async (audioFilePath: string): Promise<string> => {
     const respose:ResponseObject = await axios.post("https://api.openai.com/v1/audio/transcriptions",formData,{
       headers:{
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'multipart/form-data',
+        ...formData.getHeaders(),
       },
     })
     const transcript = respose.data.text
