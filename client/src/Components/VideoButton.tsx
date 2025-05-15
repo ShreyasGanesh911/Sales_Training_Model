@@ -36,7 +36,7 @@ function VideoButton({setMessages}:Props) {
   },[videoURL,transcript])
   return (
     <>
-      {showModal && <VideoModal setShow={setShowModal} setVideoURL={setVideoURL} setTranscript={setTranscript} setIsActive={setIsActive} />}
+      {showModal && <VideoModal setShow={setShowModal} setMessages={setMessages} setVideoURL={setVideoURL} setTranscript={setTranscript} setIsActive={setIsActive} />}
       <button
         onClick={handleVideoClick}
         className="sm:p-1 p-1 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"

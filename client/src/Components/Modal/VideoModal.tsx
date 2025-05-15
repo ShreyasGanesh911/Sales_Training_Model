@@ -1,11 +1,19 @@
 import { X } from "react-feather"
 import { useEffect, useRef, useState } from 'react'
-
+const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
+interface Message {
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+  type: 'text' | 'video' | 'audio'
+  url?: string
+}
 type Props = {
   setShow: React.Dispatch<React.SetStateAction<boolean>>
   setIsActive: React.Dispatch<React.SetStateAction<boolean>>
   setVideoURL: React.Dispatch<React.SetStateAction<string>>
   setTranscript: React.Dispatch<React.SetStateAction<string>>
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 }
 
 type MediaError = {
@@ -19,10 +27,11 @@ type UploadVideoResponse = {
   data: {
     transcript: string
     url: string
+    gptResponse: string
   }
 }
 
-function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript }: Props) {
+function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessages }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -152,13 +161,15 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript }: Props)
 
   const uploadVideo = async () => {
     if (!recordedVideo) return
+    const prevMsg = localStorage.getItem('chatMessages')
+    let prevMsgArray = JSON.parse(prevMsg || '[]')
     setIsUploading(true)
     setUploadStatus(null)
     const formData = new FormData()
     formData.append('video', recordedVideo, 'recorded-video.webm')
-
+    formData.append('messages', JSON.stringify(prevMsgArray))
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/v1/gpt/video`, {
+      const response = await fetch(`${ENDPOINT}/api/v1/gpt/video`, {
         method: 'POST',
         body: formData
       })
@@ -166,6 +177,25 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript }: Props)
       const data: UploadVideoResponse = await response.json()
       
       if (!response.ok) throw new Error(data.message || 'Upload failed')
+      const msg1 = {
+        content:data.data.transcript,
+        role:'user',
+      }
+      const msg2 = {
+        content:data.data.gptResponse,
+        role:'assistant',
+      }
+      prevMsgArray.push(msg1,msg2)
+      localStorage.setItem('chatMessages',JSON.stringify(prevMsgArray))
+      
+      setTimeout(()=>{
+        setMessages(prevMessages => [...prevMessages, {
+          text:data.data.gptResponse,
+          isUser:false,
+          timestamp:new Date(),
+          type:'text',
+        }])
+      },1000)
       setTranscript(data.data.transcript)
       setVideoURL(data.data.url)
       setUploadStatus({ success: true, message: 'Video uploaded successfully!' })
