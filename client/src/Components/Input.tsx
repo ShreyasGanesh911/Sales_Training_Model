@@ -2,7 +2,6 @@ import { useState, type Dispatch, type SetStateAction } from 'react'
 import {Send} from "react-feather";
 import MicButton from './MicButton';
 import VideoButton from './VideoButton';
-import useLocalStorage from '../hooks/useLocalStorage';
 const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
 interface Message {
   text: string;
@@ -17,7 +16,6 @@ type Props = {
 }
 
 function Input({setMessages}: Props) {
-  // const { addMessage,messages } = useLocalStorage('chatMessages');
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
