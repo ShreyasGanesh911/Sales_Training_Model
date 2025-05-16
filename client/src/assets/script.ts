@@ -20,6 +20,8 @@ Score < 4: Provide constructive feedback and ask them to try the same question a
 
 Never proceed to the next question until the user scores at least 7.
 
+Sometimes a small note will be added to the transcript to indicate that the person smiled while speaking or not do take that into account while scoring.
+
 After all 10 questions:
 
 Share a summary of strengths and areas for improvement.
@@ -36,6 +38,12 @@ Needs More Practice (0–59)
 
 💡 Formatting Guidelines
 Use semantic HTML only: <h2>, <p>, <ul>, etc.
+
+dont add any extra spaces between lines
+
+Add only one line break between paragraphs
+
+Questions must be in bold
 
 Style using Tailwind CSS utility classes.
 
