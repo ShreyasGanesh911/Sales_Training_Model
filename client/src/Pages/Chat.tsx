@@ -4,7 +4,7 @@ import MessageBubble from "../Components/MessageBubble";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { sales_script } from "../assets/script";
 import { ToastContainer } from "react-toastify";
-
+const URL = import.meta.env.VITE_SERVER_URL || ""
 interface Message {
   role: "system" | "user" | "assistant";
   content: string;
@@ -55,7 +55,7 @@ const Chat = () => {
       content:sales_script,
       role:'system'
     }
-    const response = await fetch("http://localhost:8000/api/v1/gpt/assessment",{
+    const response = await fetch(`${URL}/api/v1/gpt/assessment`,{
       method:"POST",
     });
     const data = await response.json();

@@ -17,7 +17,7 @@ const gptText = async (text:string,message:ChatCompletionMessageParam[],role:Rol
     });
     const len = [...message,{role:role,content:text}].length
     console.log(len)
-    console.log([...message,{role:role,content:text}][len-1].content)
+
     return response.choices[0].message.content;
    } catch (error) {
     
