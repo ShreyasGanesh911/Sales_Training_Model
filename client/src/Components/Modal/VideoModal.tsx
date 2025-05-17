@@ -1,36 +1,10 @@
 import { X } from "react-feather"
 import { useEffect, useRef, useState } from 'react'
 import * as faceapi from 'face-api.js';
+import { formatTime,getErrorIcon,type MediaError,type Props } from "./VideoFunctions";
+import type {UploadVideoResponse } from "../../types/types";
 const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'text' | 'video' | 'audio'
-  url?: string
-}
-type Props = {
-  setShow: React.Dispatch<React.SetStateAction<boolean>>
-  setIsActive: React.Dispatch<React.SetStateAction<boolean>>
-  setVideoURL: React.Dispatch<React.SetStateAction<string>>
-  setTranscript: React.Dispatch<React.SetStateAction<string>>
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
-}
 
-type MediaError = {
-  type: 'camera' | 'microphone' | 'both' | 'generic'
-  message: string
-}
-
-type UploadVideoResponse = {
-  success: boolean
-  message: string
-  data: {
-    transcript: string
-    url: string
-    gptResponse: string
-  }
-}
 let smileDetected:boolean = false;
 
 function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessages }: Props) {
@@ -129,12 +103,13 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   useEffect(() => {
     if (timer >= 60) stopRecording()
   }, [timer])
+
   useEffect(() => {
     const loadModels = async () => {
       try {
         await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
         await faceapi.nets.faceExpressionNet.loadFromUri('/models')
-        await faceapi.nets.faceLandmark68Net.loadFromUri('/models') // Required for better face detection
+        //await faceapi.nets.faceLandmark68Net.loadFromUri('/models') // Required for better face detection
         console.log('Face-api models loaded')
       } catch (e) {
         console.error('Error loading face-api models', e)
@@ -186,17 +161,13 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
+      smileDetected ? console.log("Smile detected during recording!") : console.log("No smile detected during recording!")
       setIsRecording(false)
       timerRef.current && clearInterval(timerRef.current)
-      
-      // Clear smile detection interval
       if (smileCheckIntervalRef.current) {
         clearInterval(smileCheckIntervalRef.current)
         smileCheckIntervalRef.current = null
       }
-      
-      // Log whether user smiled during the recording
-      console.log(smileDetected ? "User smiled at least once during the recording!" : "No smile detected during the recording.");
     }
   }
 
@@ -268,10 +239,9 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
       setTranscript(data.data.transcript)
       setVideoURL(data.data.url)
       setUploadStatus({ success: true, message: 'Video uploaded successfully!' })
-      // Close the modal after 1 second on success
       setTimeout(() => {
         handleClose()
-      }, 1000)
+      }, 500)
       
     } catch (error) {
       setUploadStatus({ 
@@ -282,22 +252,6 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
       setIsUploading(false)
     }
   }
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const getErrorIcon = (type: MediaError['type']) => {
-    switch (type) {
-      case 'microphone': return '🎤'
-      case 'camera': return '📷'
-      case 'both': return '📹'
-      default: return '⚠️'
-    }
-  }
-
   return (
     <div className='fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-0'>
       <div className="w-full md:w-4/5 lg:w-3/4 xl:w-1/2 min-h-[50vh] sm:h-[70vh] bg-white mt-2 sm:mt-10 relative rounded-lg shadow-lg p-4">
@@ -316,8 +270,7 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
 
         {uploadStatus && (
           <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-6 py-3 rounded-lg ${
-            uploadStatus.success ? 'bg-green-500' : 'bg-red-500'
-          } text-white text-sm sm:text-base`}>
+            uploadStatus.success ? 'bg-green-500' : 'bg-red-500'} text-white text-sm sm:text-base`}>
             {uploadStatus.message}
           </div>
         )}
