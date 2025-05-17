@@ -1,19 +1,9 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useState} from 'react'
 import { Video} from 'react-feather'
 import VideoModal from './Modal/VideoModal'
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'text' | 'video' | 'audio'
-  url?: string
-}
+import type {SetMessageProps } from '../types/types'
 
-type Props = {
-  setMessages: Dispatch<SetStateAction<Message[]>>
-}
-
-function VideoButton({setMessages}:Props) {
+function VideoButton({setMessages}:SetMessageProps) {
   const [isActive, setIsActive] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [videoURL, setVideoURL] = useState<string>("")

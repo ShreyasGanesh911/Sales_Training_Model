@@ -1,21 +1,12 @@
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { useState} from 'react'
 import {Send} from "react-feather";
 import MicButton from './MicButton';
 import VideoButton from './VideoButton';
+import type {SetMessageProps } from '../types/types';
+import { toastError } from '../Toast/toast';
 const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'text' | 'video' | 'audio'
-  url?: string
-}
 
-type Props = {
-  setMessages: Dispatch<SetStateAction<Message[]>>
-}
-
-function Input({setMessages}: Props) {
+function Input({setMessages}: SetMessageProps) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,8 +43,11 @@ function Input({setMessages}: Props) {
           messages:prevMsgArray
         })
       })
+      if(!response.ok){
+        toastError("Failed to send message")
+        throw new Error('Failed to send message')
+      }
       const data = await response.json();
-      
       // Remove the typing indicator and add the actual response
       setMessages(prev => {
         const newMessages = [...prev];
@@ -73,11 +67,8 @@ function Input({setMessages}: Props) {
         content:data.data,
         role:'assistant',
       }
-      
-            //console.log(prevMsg)
-            
-            prevMsgArray.push(msg1,msg2)
-            localStorage.setItem('chatMessages',JSON.stringify(prevMsgArray))
+      prevMsgArray.push(msg1,msg2)
+      localStorage.setItem('chatMessages',JSON.stringify(prevMsgArray))
     } catch (error) {
       console.error('Error:', error);
       // Remove the typing indicator on error

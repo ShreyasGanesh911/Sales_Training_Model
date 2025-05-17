@@ -1,35 +1,17 @@
-import { useState, useRef, type Dispatch, type SetStateAction, useEffect } from 'react'
+import { useState, useRef,useEffect } from 'react'
 import { Mic, MicOff, Loader } from 'react-feather'
+import { toastError } from '../Toast/toast';
+import type {AudioResponse,SetMessageProps } from '../types/types';
 const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'text' | 'video' | 'audio'
-  url?: string
-}
 
-type Props = {
-  setMessages: Dispatch<SetStateAction<Message[]>>
-}
-
-type AudioResponse = {
-  success: boolean;
-  message: string;
-  data: {
-    transcript: string;
-    url: string;
-    gptResponse: string;
-  }
-}
-
-function MicButton({setMessages}:Props) {
+function MicButton({setMessages}:SetMessageProps) {
   const [isMicActive, setIsMicActive] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const [url, setUrl] = useState<string>("")
   const [transcript, setTranscript] = useState<string>("")
+
   const enableMicrophone = async (e: React.PointerEvent) => {
     e.preventDefault()
     // Reset states when starting new recording
@@ -79,7 +61,11 @@ function MicButton({setMessages}:Props) {
           const data: AudioResponse = await response.json()
           // console.log('Audio upload response:', data)
 
-          if (!response.ok) throw new Error(data.message || 'Upload failed')
+          if (!response.ok) {
+            toastError("Failed to upload audio")
+            throw new Error(data.message || 'Upload failed')
+            
+          }
 
           if (data.data.url && data.data.transcript) {
             setUrl(data.data.url)
@@ -143,6 +129,7 @@ function MicButton({setMessages}:Props) {
   return (
     <>
       <button
+        onContextMenu={(e) => e.preventDefault()}
         onPointerDown={enableMicrophone}
         onPointerUp={disableMicrophone}
         onPointerLeave={disableMicrophone}

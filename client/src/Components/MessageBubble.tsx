@@ -1,11 +1,4 @@
-interface Message {
-    text: string;
-    isUser: boolean;
-    timestamp: Date;
-    type: 'text' | 'video' | 'audio'
-    url?: string
-}
-
+import type { Message } from '../types/types'
 // Typing animation component
 const TypingAnimation = () => (
   <div className="flex space-x-1">

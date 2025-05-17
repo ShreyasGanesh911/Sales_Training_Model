@@ -1,31 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import Input from "../Components/Input";
 import MessageBubble from "../Components/MessageBubble";
-import useLocalStorage from "../hooks/useLocalStorage";
 import { sales_script } from "../assets/script";
 import { ToastContainer } from "react-toastify";
+import type { Message,GPTMessage } from "../types/types";
+import { toastError } from "../Toast/toast";
 const URL = import.meta.env.VITE_SERVER_URL || ""
-interface Message {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-interface MessageBubble {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'text' | 'video' | 'audio'
-  url?: string
-}
+
 const welcomeMessage = `Welcome! 👋 \n\nTo get started, press the <span class="text-blue-500 hover:text-blue-600 hover:cursor-pointer">Start Assessment</span> button.`
 
 const Chat = () => {
-  const {clearMessages } = useLocalStorage('chatMessages');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isAssessment, setIsAssessment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonText, setButtonText] = useState("Start Assessment");
-  const [chatMessages, setChatMessages] = useState<MessageBubble[]>([
+  const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       isUser:false,
       text:welcomeMessage,
@@ -38,9 +28,24 @@ const Chat = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
+  const checkMicAccess = async () => {
+    try {
+      const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      if(permission.state === 'granted'){
+        console.log('Microphone access granted');
+      }
+      if (permission.state === 'prompt') {
+        // Try to get access
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+    } catch (error) {
+      toastError("Microphone access denied")
+      console.log(error)
+    }
+  }
   useEffect(() => {
-    clearMessages();
+    localStorage.setItem('chatMessages', JSON.stringify([]))
+    checkMicAccess()
   }, []);
 
   useEffect(() => {
@@ -51,7 +56,7 @@ const Chat = () => {
     e.preventDefault();
     setIsLoading(true);
     setButtonText("Starting assessment...");
-    const msg1:Message = {
+    const msg1:GPTMessage = {
       content:sales_script,
       role:'system'
     }
@@ -59,7 +64,7 @@ const Chat = () => {
       method:"POST",
     });
     const data = await response.json();
-    const msg2:Message = {
+    const msg2:GPTMessage = {
       content:data.data,
       role:'assistant'
     }
