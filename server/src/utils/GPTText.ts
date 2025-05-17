@@ -15,8 +15,8 @@ const gptText = async (text:string,message:ChatCompletionMessageParam[],role:Rol
         model: "gpt-4-turbo",
         messages: [...message,{role:role,content:text}]
     });
-    const len = [...message,{role:role,content:text}].length
-    console.log(len)
+    // const len = [...message,{role:role,content:text}].length
+    // console.log(len)
 
     return response.choices[0].message.content;
    } catch (error) {

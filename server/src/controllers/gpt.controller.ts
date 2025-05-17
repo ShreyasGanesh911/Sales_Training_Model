@@ -60,7 +60,7 @@ export const handleAudio = AsyncHandler(async(req:Request,res:Response,next:Next
 export const handleVideo= AsyncHandler(async(req:Request,res:Response,next:NextFunction)=>{
     const file = req.file as Express.Multer.File;
     const smileDetected:boolean = req.body.smileDetected?.toLowerCase() === 'true';
-    console.log(smileDetected)
+    // console.log(smileDetected)
     const messages = JSON.parse(req.body.messages);
     if(!file){
         return next(new ErrorHandler("No video file provided",400));
