@@ -4,7 +4,7 @@ import MessageBubble from "../Components/MessageBubble";
 import { sales_script } from "../assets/script";
 import { ToastContainer } from "react-toastify";
 import type { Message,GPTMessage } from "../types/types";
-import { toastError } from "../Toast/toast";
+import { toastError,toastSuccess } from "../Toast/toast";
 const URL = import.meta.env.VITE_SERVER_URL || ""
 
 const welcomeMessage = `Welcome! 👋 \n\nTo get started, press the <span class="text-blue-500 hover:text-blue-600 hover:cursor-pointer">Start Assessment</span> button.`
@@ -63,6 +63,12 @@ const Chat = () => {
     const response = await fetch(`${URL}/api/v1/gpt/assessment`,{
       method:"POST",
     });
+    if(!response.ok){
+      toastError("Failed to start assessment")
+      setIsLoading(false)
+      return
+    }
+    toastSuccess("Assessment started")
     const data = await response.json();
     const msg2:GPTMessage = {
       content:data.data,
