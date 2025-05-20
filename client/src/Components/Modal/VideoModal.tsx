@@ -107,16 +107,69 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   useEffect(() => {
     const loadModels = async () => {
       try {
-        await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
-        await faceapi.nets.faceExpressionNet.loadFromUri('/models')
-        //await faceapi.nets.faceLandmark68Net.loadFromUri('/models') // Required for better face detection
-        console.log('Face-api models loaded')
+        // Check for WebGL support with more detailed detection
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        
+        if (!gl) {
+          console.log("WebGL is not supported in your browser. Please try using a different browser like Chrome, Firefox, or Edge.");
+          setError({
+            type: 'generic',
+            message: 'WebGL is not supported in your browser. Please try using a different browser like Chrome, Firefox, or Edge.'
+          });
+          return;
+        }
+
+        // Check if we're using SwiftShader (software rendering)
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          if (renderer && renderer.toLowerCase().includes('swiftshader')) {
+            console.log("Using software WebGL (SwiftShader) which may cause performance issues.");
+            setError({
+              type: 'generic',
+              message: 'Your browser is using software-based WebGL which may cause performance issues. Please enable hardware acceleration in your browser settings or try a different browser.'
+            });
+            return;
+          }
+        }
+
+        // Create a dummy canvas for warm-up
+        const dummyCanvas = document.createElement('canvas');
+        dummyCanvas.width = 640;
+        dummyCanvas.height = 480;
+        const ctx = dummyCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, dummyCanvas.width, dummyCanvas.height);
+        }
+
+        // Load models
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+          faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+          faceapi.nets.faceLandmark68Net.loadFromUri('/models')
+        ]);
+        
+        console.log('Face-api models loaded');
+        
+        // Warm up the models with the dummy canvas
+        const dummyImage = await faceapi.fetchImage(dummyCanvas.toDataURL());
+        await faceapi
+          .detectAllFaces(dummyImage, new faceapi.TinyFaceDetectorOptions())
+          .withFaceExpressions();
+          
+        console.log('Models warmed up successfully');
       } catch (e) {
-        console.error('Error loading face-api models', e)
+        console.error('Error loading face-api models', e);
+        setError({
+          type: 'generic',
+          message: 'Failed to initialize face detection. Please try using a different browser or check if your device supports WebGL.'
+        });
       }
-    }
-    loadModels()
-  }, [])
+    };
+    loadModels();
+  }, []);
   
 
   const startRecording = () => {
@@ -134,6 +187,9 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
     // Start checking for smiles periodically
     smileCheckIntervalRef.current = window.setInterval(checkSmileOnce, 1000);
     const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    if(!MediaRecorder.isTypeSupported(options.mimeType)){
+      options.mimeType = 'video/webm'
+    }
     const mediaRecorder = new MediaRecorder(streamRef.current, options)
     mediaRecorderRef.current = mediaRecorder
     const chunks: Blob[] = []
