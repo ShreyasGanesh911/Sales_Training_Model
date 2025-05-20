@@ -9,7 +9,6 @@ const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
 function Input({setMessages}: SetMessageProps) {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async() => {
     const prevMsg = localStorage.getItem('chatMessages')
     let prevMsgArray = JSON.parse(prevMsg || '[]')
@@ -105,9 +104,9 @@ function Input({setMessages}: SetMessageProps) {
                 disabled={!message.trim() || isLoading}
                 className="sm:p-1 p-1 rotate-45 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
               >
-                <Send height={19} />
+                <Send height={21} />
               </button>
-              <MicButton setMessages={setMessages} />
+              <MicButton setMessages={setMessages}  />
               <VideoButton setMessages={setMessages}/>
             </div>
           </div>

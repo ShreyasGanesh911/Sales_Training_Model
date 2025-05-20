@@ -37,9 +37,10 @@ function MicButton({setMessages}:SetMessageProps) {
       console.error('Error accessing microphone:', error)
     }
   }
-
+  
   const disableMicrophone = async (e: React.PointerEvent) => {
     e.preventDefault()
+    
     const prevMsg = localStorage.getItem('chatMessages')
     let prevMsgArray = JSON.parse(prevMsg || '[]')
     if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') return
@@ -69,6 +70,7 @@ function MicButton({setMessages}:SetMessageProps) {
 
           if (data.data.url && data.data.transcript) {
             setUrl(data.data.url)
+
             setTranscript(data.data.transcript)
  
             const msg1 = {
@@ -133,15 +135,15 @@ function MicButton({setMessages}:SetMessageProps) {
         onPointerDown={enableMicrophone}
         onPointerUp={disableMicrophone}
         onPointerLeave={disableMicrophone}
-        className="sm:p-1 p-1 text-red-500 rounded-full hover:text-red-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
+        className="sm:p-1 p-1 mx-0.5 text-red-500 rounded-full hover:text-red-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
         disabled={isProcessing}
       >
         {isProcessing ? (
           <Loader size={19} className="animate-spin text-blue-500" />
         ) : isMicActive ? (
-          <Mic size={19} className="bg-blue-500 rounded-full text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50" /> 
+          <Mic size={21} className="bg-blue-500 rounded-full text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50" /> 
         ) : (
-          <MicOff size={19} />
+          <MicOff size={21} />
         )}
       </button>
     </>

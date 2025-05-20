@@ -32,9 +32,9 @@ function VideoButton({setMessages}:SetMessageProps) {
         className="sm:p-1 p-1 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
       >
         {isActive ? (
-          <Video size={19} className="bg-blue-500 rounded-full text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50" />
+          <Video size={21} className="bg-blue-500 rounded-full text-white animate-pulse ring-4 ring-blue-300 ring-opacity-50" />
         ) : (
-          <Video size={19} />
+          <Video size={21} />
         )}
       </button>
     </>
