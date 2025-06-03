@@ -58,7 +58,14 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   useEffect(() => {
     async function startVideo() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: {
+            width: { exact: 640 },
+            height: { exact: 480 },
+            frameRate: { exact: 24 }
+          }, 
+          audio: true 
+        })
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           videoRef.current.muted = true
