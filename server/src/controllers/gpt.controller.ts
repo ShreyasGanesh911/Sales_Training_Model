@@ -60,24 +60,29 @@ export const handleAudio = AsyncHandler(async(req:Request,res:Response,next:Next
 export const handleVideo= AsyncHandler(async(req:Request,res:Response,next:NextFunction)=>{
     const file = req.file as Express.Multer.File;
     const smileDetected:boolean = req.body.smileDetected?.toLowerCase() === 'true';
-    // console.log(smileDetected)
     const messages = JSON.parse(req.body.messages);
     if(!file){
         return next(new ErrorHandler("No video file provided",400));
     }
-    let transcript = await getWhisperTranscript(file.path);
-    const speechNote = transcript
+
+    // Run transcript generation and video upload in parallel
+    const [transcriptResult, videoUploadResult] = await Promise.all([
+        getWhisperTranscript(file.path),
+        uploadToCloudinary(file.path)
+    ]);
+
+    let transcript = transcriptResult;
+    const speechNote = transcript;
     transcript += smileDetected
-  ? '\n[Note: The person smiled while speaking]'
-  : '\n[Note: The person did not smile while speaking]';
-    const videoUrl = await uploadToCloudinary(file.path);
-    const gptResponse = await gptText(transcript,messages,Role.USER);
-    const videoUrlString = videoUrl?.url;
+        ? '\n[Note: The person smiled while speaking]'
+        : '\n[Note: The person did not smile while speaking]';
+
+    const gptResponse = await gptText(transcript, messages, Role.USER);
+    const videoUrlString = videoUploadResult?.url;
 
     // Delete the file after processing
     fs.unlinkSync(file.path);
 
-    // console.log(videoUrl)
     res.status(200).json({
         success:true,
         message:"Video transcript",
