@@ -20,7 +20,8 @@ function VideoButton({setMessages}:SetMessageProps) {
         isUser: true,
         timestamp: new Date(),
         type: 'video',
-        url: videoURL
+        url: videoURL,
+        transcript: transcript
       }])
     }
   },[videoURL,transcript])

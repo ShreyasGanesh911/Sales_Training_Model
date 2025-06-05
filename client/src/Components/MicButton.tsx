@@ -120,7 +120,8 @@ function MicButton({setMessages}:SetMessageProps) {
         isUser: true,
         timestamp: new Date(),
         type: 'audio',
-        url: url
+        url: url,
+        transcript: transcript
       }])
       // Reset states after adding message
       setUrl("")
