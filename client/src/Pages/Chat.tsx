@@ -6,14 +6,18 @@ import { ToastContainer } from "react-toastify";
 import type { Message,GPTMessage } from "../types/types";
 import { toastError,toastSuccess } from "../Toast/toast";
 const URL = import.meta.env.VITE_SERVER_URL || ""
-
-const welcomeMessage = `Welcome! 👋 \n\nTo get started, press the <span class="text-blue-500 hover:text-blue-600 hover:cursor-pointer">Start Assessment</span> button.`
+import { ChevronDown } from "react-feather";
+const welcomeMessage = `**Welcome! 👋**`
 
 const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [isAssessment, setIsAssessment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [userScrolled, setUserScrolled] = useState(false);
+  const lastScrollPosition = useRef<number>(0);
   const [buttonText, setButtonText] = useState("Start Assessment");
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
@@ -21,13 +25,40 @@ const Chat = () => {
       text:welcomeMessage,
       timestamp:new Date(),
       type:'text',
-      
     }
   ]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setUserScrolled(false);
   };
+
+  const handleScroll = () => {
+    if (!chatContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 50;
+    
+    // Detect scroll direction
+    const isScrollingUp = scrollTop < lastScrollPosition.current;
+    lastScrollPosition.current = scrollTop;
+
+    // Only update userScrolled if they're actually scrolling up
+    if (isScrollingUp && !isAtBottom) {
+      setUserScrolled(true);
+    }
+
+    setShowScrollButton(!isAtBottom);
+  };
+
+  // Handle typing state changes
+  const handleTyping = (typing: boolean) => {
+    setIsTyping(typing);
+    if (typing && !userScrolled) {
+      scrollToBottom();
+    }
+  };
+
   const checkMicAccess = async () => {
     try {
       const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
@@ -49,8 +80,21 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [chatMessages]);
+    // Only auto-scroll for new messages if we're at the bottom or typing
+    if (!userScrolled || (isTyping && chatMessages[chatMessages.length - 1]?.isUser === false)) {
+      scrollToBottom();
+    }
+  }, [chatMessages, isTyping]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      handleScroll();
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const handleStartAssessment = async(e:React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -89,21 +133,60 @@ const Chat = () => {
     <>
        <div className="flex justify-center items-start min-h-screen bg-gray-50 p-4">
        <div className="w-full 2xl:max-w-[40%] xl:max-w-[70%] relative h-[95vh] bg-white rounded-2xl shadow-lg">
-        <div ref={chatContainerRef} className="h-full overflow-y-auto pb-40 px-6 pt-6">
+        {showScrollButton && !isTyping && (
+          <button 
+            onClick={scrollToBottom}
+            className="border border-gray-200 rounded-full bg-white p-2 absolute bottom-24 right-4 hover:bg-gray-50 transition-all duration-200 shadow-md hover:shadow-lg"
+            aria-label="Scroll to bottom"
+          >
+           <ChevronDown className="text-gray-600" size={20} />
+          </button>
+        )}
+        <div 
+          ref={chatContainerRef} 
+          className="h-full overflow-y-auto pb-40 px-6 pt-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          onScroll={handleScroll}
+        >
           {chatMessages.map((message, index) => (
-            <MessageBubble  key={index} index={index}  message={message}/>
+            <MessageBubble 
+              key={index} 
+              index={index} 
+              message={message}
+              onTyping={handleTyping}
+            />
           ))}
            <div ref={messagesEndRef} />
         </div>
-        <div className="absolute bottom-0.5 w-full left-0  rounded-2xl right-0 px-6 bg-white mr-5">
+        <div className="absolute bottom-0.5 w-full left-0 rounded-2xl right-0 px-6 bg-white mr-5">
           {!isAssessment ? (
-            <div className="flex justify-center items-center  py-5 px-1">
-              <button className={`border py-2 px-2 rounded-xl  ${isLoading ? " disabled:opacity-50 bg-blue-500 text-white" : "hover:cursor-pointer hover:bg-blue-600 hover:text-white transition-all duration-300 text-blue-600"}`} onClick={handleStartAssessment}>{buttonText}</button>
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Ready to Start?</h2>
+              <p className="text-gray-600 mb-6 text-center">Click the button below to begin your assessment</p>
+              <button 
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl text-base font-medium
+                  shadow-md hover:shadow-lg transition-all duration-300
+                  ${isLoading 
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                    : "bg-blue-500 hover:bg-blue-600 text-white hover:scale-105"
+                  }
+                `} 
+                onClick={handleStartAssessment}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"/>
+                    {buttonText}
+                  </>
+                ) : (
+                  buttonText
+                )}
+              </button>
             </div>
           ) : (
             <Input setMessages={setChatMessages}/>
           )}
-            
         </div>
         </div>
         <ToastContainer/>

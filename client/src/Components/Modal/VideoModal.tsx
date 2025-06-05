@@ -318,9 +318,19 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   return (
     <div className='fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-0'>
       <div className="w-full md:w-4/5 lg:w-3/4 xl:w-1/2 min-h-[50vh] sm:h-[70vh] bg-white mt-2 sm:mt-10 relative rounded-lg shadow-lg p-4">
-        <button onClick={handleClose} className="absolute top-4 right-4 p-2 hover:text-red-500 transition-colors z-10">
-          <X size={22}/>
+        <button 
+          onClick={handleClose} 
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 text-gray-600 hover:text-gray-800 z-50 cursor-pointer"
+          aria-label="Close modal"
+        >
+          <X size={22} className="pointer-events-none"/>
         </button>
+
+        <div 
+          className="fixed inset-0  bg-opacity-50 -z-10" 
+          onClick={handleClose}
+          aria-hidden="true"
+        />
 
         {isUploading && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg z-20">
@@ -332,7 +342,7 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
         )}
 
         {uploadStatus && (
-          <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-6 py-3 rounded-lg ${
+          <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 z-30 px-6 py-3 rounded-lg shadow-lg ${
             uploadStatus.success ? 'bg-green-500' : 'bg-red-500'} text-white text-sm sm:text-base`}>
             {uploadStatus.message}
           </div>
@@ -360,44 +370,70 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
           </div>
         }
         
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-wrap gap-2 sm:gap-4 items-center justify-center w-full px-4">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-wrap gap-3 sm:gap-4 items-center justify-center w-full px-4">
           {!error && (
             <>
               {isRecording && (
-                <div className="bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-medium">
+                <div className="bg-white border border-gray-200 shadow-sm text-gray-700 px-4 py-2 rounded-full text-sm font-medium">
                   {formatTime(timer)}
                 </div>
               )}
               {!isRecording ? (
                 recordedVideo ? (
-                  <div className="flex flex-wrap gap-2 sm:gap-4 items-center justify-center">
-                    <button onClick={togglePlayback} className="bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm sm:text-base">
+                  <div className="flex flex-wrap gap-3 sm:gap-4 items-center justify-center">
+                    <button 
+                      onClick={togglePlayback} 
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow text-sm sm:text-base font-medium"
+                    >
                       {isPlaying ? 'Pause' : 'Play'}
                     </button>
-                    <button onClick={restartVideo} className="bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-sm sm:text-base">
+                    <button 
+                      onClick={restartVideo} 
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow text-sm sm:text-base font-medium"
+                    >
                       Restart
                     </button>
-                    <button onClick={startRecording} className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm sm:text-base">
+                    <button 
+                      onClick={startRecording} 
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-sm hover:shadow text-sm sm:text-base font-medium"
+                    >
                       Record New
                     </button>
                     <button 
                       onClick={uploadVideo} 
                       disabled={isUploading}
-                      className={`bg-green-500 text-white px-3 sm:px-4 py-2 rounded-md transition-colors text-sm sm:text-base ${
-                        isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all duration-200 text-sm sm:text-base font-medium ${
+                        isUploading 
+                          ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' 
+                          : 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm hover:shadow-md'
                       }`}
                     >
-                      Upload Video
+                      {isUploading ? (
+                        <>
+                          <span className="inline-block w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"/>
+                          Uploading...
+                        </>
+                      ) : (
+                        'Upload Video'
+                      )}
                     </button>
                   </div>
                 ) : (
-                  <button onClick={startRecording} className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-red-600 transition-colors flex items-center gap-2 text-sm sm:text-base">
-                    <span className="h-2 w-2 rounded-full bg-white"/> Start Recording 
+                  <button 
+                    onClick={startRecording} 
+                    className="flex items-center gap-2 px-5 py-3 rounded-full bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-sm hover:shadow text-sm sm:text-base font-medium"
+                  >
+                    <span className="h-2 w-2 rounded-full bg-red-500"/> 
+                    Start Recording
                   </button>
                 )
               ) : (
-                <button onClick={stopRecording} className="bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-md hover:bg-gray-600 transition-colors flex items-center gap-2 text-sm sm:text-base">
-                  <span className="h-3 w-3 bg-white"/> Stop Recording
+                <button 
+                  onClick={stopRecording} 
+                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow text-sm sm:text-base font-medium"
+                >
+                  <span className="h-3 w-3 bg-gray-600 rounded"/> 
+                  Stop Recording
                 </button>
               )}
             </>
