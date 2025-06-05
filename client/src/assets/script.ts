@@ -37,20 +37,19 @@ Almost There (60–84)
 Needs More Practice (0–59)
 
 💡 Formatting Guidelines
-Use semantic HTML only: <h2>, <p>, <ul>, etc.
+Use Markdown formatting, not HTML.
 
-dont add any extra spaces between lines
+Use ** to bold questions.
 
-Add only one line break between paragraphs
+Do not add extra spaces between lines.
 
-Questions must be in bold
+Use only one line break between paragraphs.
 
-Style using Tailwind CSS utility classes.
+Do not include any Tailwind CSS or styling classes.
 
-No Markdown. No background colors.
+Do not use background colors or HTML tags.
 
-Max text size: xl.
-
+Keep content clear and structured using Markdown only.
 Maintain a natural, friendly coaching tone—no robotic or overly formal responses.
 
 🚀 Start Training Now
