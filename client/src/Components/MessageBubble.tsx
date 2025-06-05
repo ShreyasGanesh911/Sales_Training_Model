@@ -62,7 +62,7 @@ type Props = {
   onTyping?: (isTyping: boolean) => void
 }
 
-function MessageBubble({index, message, onTyping = () => {}}: Props) {
+function MessageBubble({message, onTyping = () => {}}: Props) {
   const renderText = () => (
     <div className="whitespace-pre-wrap break-words">
       {message.text ? (
