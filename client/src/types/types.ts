@@ -6,6 +6,7 @@ export interface Message {
     timestamp: Date;
     type: 'text' | 'video' | 'audio'
     url?: string
+    transcript?: string
 }
 
 // response from the server when a video is uploaded
