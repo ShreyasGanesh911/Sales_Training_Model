@@ -267,6 +267,14 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
     let prevMsgArray = JSON.parse(prevMsg || '[]')
     setIsUploading(true)
     setUploadStatus(null)
+
+    // Stop video playback and mute audio when upload starts
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.muted = true
+      setIsPlaying(false)
+    }
+
     const formData = new FormData()
     formData.append('video', recordedVideo, 'recorded-video.webm')
     formData.append('messages', JSON.stringify(prevMsgArray))
@@ -302,9 +310,7 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
       setTranscript(data.data.transcript)
       setVideoURL(data.data.url)
       setUploadStatus({ success: true, message: 'Video uploaded successfully!' })
-      setTimeout(() => {
-        handleClose()
-      }, 500)
+      handleClose()  // Close modal immediately after successful upload
       
     } catch (error) {
       setUploadStatus({ 
