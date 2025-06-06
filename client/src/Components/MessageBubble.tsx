@@ -39,7 +39,7 @@ const TypeWriter = ({ text, onTyping }: { text: string, onTyping: (isTyping: boo
         if (currentIndex % 5 === 0) {
           onTyping(true);
         }
-      }, 10);
+      }, 9);
       return () => clearTimeout(timeout);
     } else {
       setIsComplete(true);
@@ -64,7 +64,7 @@ type Props = {
 
 function MessageBubble({message, onTyping = () => {}}: Props) {
   const renderText = () => (
-    <div className="whitespace-pre-wrap break-words">
+    <div className="whitespace-pre-wrap break-words font-sans">
       {message.text ? (
         message.isUser ? (
           message.text
@@ -106,7 +106,7 @@ function MessageBubble({message, onTyping = () => {}}: Props) {
         controls 
         controlsList="nodownload noplaybackrate"
         preload="metadata"
-        className="w-full max-w-[300px] h-[36px]"
+        className="w-full max-w-[500px] h-[48px] rounded-lg bg-gray-100 shadow-md"
         onError={(e) => {
           const target = e.target as HTMLAudioElement;
           if (target.error) {
