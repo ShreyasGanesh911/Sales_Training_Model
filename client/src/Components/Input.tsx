@@ -15,6 +15,11 @@ function Input({setMessages}: SetMessageProps) {
     if (!message.trim()) return
     const userText = message;
     setMessage("")
+    // Reset textarea height to original
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      textarea.style.height = '40px';
+    }
     setMessages(prev => [...prev, {
       text: userText,
       isUser: true,
@@ -77,7 +82,7 @@ function Input({setMessages}: SetMessageProps) {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSubmit()
@@ -88,26 +93,36 @@ function Input({setMessages}: SetMessageProps) {
     <>
       <div className="flex items-center justify-center w-full h-full gap-4 bg-white">
         <div className="absolute bottom-1 left-0 right-0 rounded-2xl mb-[-6px] bg-white mx-2 pb-4 flex items-center justify-center">
-          <div className="flex items-center sm:gap-2 gap-1 p-1 w-full rounded-full shadow-lg border border-gray-100 sm:pr-4 pr-2 bg-white">
-            <input 
-              onKeyDown={handleKeyDown}
-              type="text"
-              placeholder="Type your message..."
-              className="flex-1 px-4 py-4 bg-transparent rounded-full text-gray-700 placeholder-gray-400 outline-none"
-              value={message} 
-              onChange={(e) => setMessage(e.target.value)}
-              disabled={isLoading}
-            />
-            <div id='Buttons' className='bg-white'>
-              <button 
-                onClick={handleSubmit}
-                disabled={!message.trim() || isLoading}
-                className="sm:p-1 p-1 rotate-45 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
-              >
-                <Send height={21} />
-              </button>
-              <MicButton setMessages={setMessages}  />
-              <VideoButton setMessages={setMessages}/>
+          <div className="flex items-center gap-2 p-1 w-full shadow-lg border border-gray-100 sm:pr-4 pr-2 bg-white rounded-xl">
+            <div className='w-[70%] sm:w-4/5 flex flex-col'>
+              <textarea 
+                onKeyDown={handleKeyDown}
+                placeholder="Type your message..."
+                className="w-full px-2 sm:px-4 py-2 sm:py-4 bg-transparent rounded-xl text-gray-700 placeholder-gray-400 outline-none resize-none h-auto min-h-[40px] sm:min-h-[60px] max-h-[150px] overflow-y-auto"
+                value={message} 
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  // Auto-adjust height up to max-height
+                  e.target.style.height = 'auto';
+                  const newHeight = Math.min(e.target.scrollHeight, 150);
+                  e.target.style.height = `${newHeight}px`;
+                }}
+                disabled={isLoading}
+                rows={1}
+              />
+            </div>
+            <div id='Buttons' className='w-[30%] sm:w-1/5 flex items-end justify-end self-end sm:pb-2 pb-1'>
+              <div className='flex flex-row gap-1 sm:gap-2'>
+                <button 
+                  onClick={handleSubmit}
+                  disabled={!message.trim() || isLoading}
+                  className="p-1 sm:p-2 rotate-45 text-blue-500 hover:text-blue-800 transition-colors hover:cursor-pointer duration-200 disabled:text-gray-300"
+                >
+                  <Send height={18} className="sm:h-[21px]" />
+                </button>
+                <MicButton setMessages={setMessages} />
+                <VideoButton setMessages={setMessages}/>
+              </div>
             </div>
           </div>
         </div>
