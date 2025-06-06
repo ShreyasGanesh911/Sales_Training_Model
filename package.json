@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@types/wavesurfer.js": "^6.0.12",
+    "wavesurfer.js": "^7.9.5"
+  }
+}
