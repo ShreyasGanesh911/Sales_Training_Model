@@ -16,7 +16,6 @@ cloudinary.v2.config({
         const file = await cloudinary.v2.uploader.upload(filePath,{
             resource_type: "video",
         })
-        console.log("Uploaded to cloudinary");
         return file
 
     }catch(e){
