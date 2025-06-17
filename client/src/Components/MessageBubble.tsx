@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import type { Options } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { welcomeMessage } from '../assets/Constant'
+
 
 // Custom styles for hiding scrollbar while maintaining functionality
 
@@ -39,7 +41,7 @@ const TypeWriter = ({ text, onTyping }: { text: string, onTyping: (isTyping: boo
         if (currentIndex % 5 === 0) {
           onTyping(true);
         }
-      }, 9);
+      }, 5);
       return () => clearTimeout(timeout);
     } else {
       setIsComplete(true);
@@ -67,7 +69,13 @@ function MessageBubble({message, onTyping = () => {}}: Props) {
     <div className="whitespace-pre-wrap break-words font-sans">
       {message.text ? (
         message.isUser ? (
-          message.text
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown {...markdownOptions}>{message.text}</ReactMarkdown>
+          </div>
+        ) : message.text === welcomeMessage ? (
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown {...markdownOptions}>{message.text}</ReactMarkdown>
+          </div>
         ) : (
           <TypeWriter text={message.text} onTyping={onTyping} />
         )
