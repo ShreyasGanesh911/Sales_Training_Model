@@ -7,7 +7,7 @@ import type { Message,GPTMessage } from "../types/types";
 import { toastError,toastSuccess } from "../Toast/toast";
 const URL = import.meta.env.VITE_SERVER_URL || ""
 import { ChevronDown } from "react-feather";
-const welcomeMessage = `**Welcome! 👋**`
+import { welcomeMessage } from "../assets/Constant";
 
 const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
