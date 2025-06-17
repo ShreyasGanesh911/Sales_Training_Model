@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as faceapi from 'face-api.js';
 import { formatTime,getErrorIcon,type MediaError,type Props } from "./VideoFunctions";
 import type {UploadVideoResponse } from "../../types/types";
+import { uploadMessages } from "../../assets/Constant";
 const ENDPOINT = import.meta.env.VITE_SERVER_URL || "";
 
 let smileDetected:boolean = false;
@@ -21,6 +22,8 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
   const [isPlaying, setIsPlaying] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<{ success?: boolean; message: string } | null>(null)
+  const [uploadMessageIndex, setUploadMessageIndex] = useState(0);
+
   const checkSmileOnce = async () => {
     if (!videoRef.current) return;
   
@@ -60,9 +63,9 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: {
-            width: { exact: 640 },
-            height: { exact: 480 },
-            frameRate: { exact: 24 }
+            width: { exact: 320 },
+            height: { exact: 240 },
+            frameRate: { exact: 12 }
           }, 
           audio: true 
         })
@@ -321,6 +324,18 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
       setIsUploading(false)
     }
   }
+
+  useEffect(() => {
+    if (isUploading) {
+      const interval = setInterval(() => {
+        setUploadMessageIndex((prev) => (prev + 1) % uploadMessages.length);
+      }, 3500);
+      return () => clearInterval(interval);
+    } else {
+      setUploadMessageIndex(0);
+    }
+  }, [isUploading]);
+
   return (
     <div className='fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-0'>
       <div className="w-full md:w-4/5 lg:w-3/4 xl:w-1/2 min-h-[50vh] sm:h-[70vh] bg-white mt-2 sm:mt-10 relative rounded-lg shadow-lg p-4">
@@ -340,9 +355,10 @@ function VideoModal({ setShow, setIsActive, setVideoURL, setTranscript,setMessag
 
         {isUploading && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg z-20">
-            <div className="text-white text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent mx-auto mb-3"></div>
-              <p>Uploading video...</p>
+            <div className="text-white text-center flex flex-col items-center gap-4">
+              {/* Fun animated emoji (popcorn bounce) */}
+              <div className="text-5xl animate-bounce">🍿</div>
+              <p className="text-lg font-semibold animate-pulse">{uploadMessages[uploadMessageIndex]}</p>
             </div>
           </div>
         )}
